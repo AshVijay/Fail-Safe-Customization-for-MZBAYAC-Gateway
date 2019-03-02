@@ -1,0 +1,2 @@
+# <target name>	<source device>		<key file>	<options>
+#cryptswap1 UUID=b8da09a1-6d53-4017-8a1e-98d7bf1cfb2d /dev/urandom swap,offset=1024,cipher=aes-xts-plain64

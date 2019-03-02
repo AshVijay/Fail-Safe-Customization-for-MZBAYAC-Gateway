@@ -1,0 +1,1 @@
+ACTION=="add", SUBSYSTEM=="block" ATTRS{idVendor}=="****", ATTRS{idProduct}=="****", RUN+="/usr/local/bin/firmware-update.sh"

@@ -1,0 +1,1 @@
+tune2fs -c 1 /dev/mmcblk0px
