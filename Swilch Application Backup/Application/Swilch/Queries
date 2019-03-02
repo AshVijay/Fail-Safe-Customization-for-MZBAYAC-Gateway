@@ -1,0 +1,5 @@
+1) How to differentiate GSM Module from standard USB ? 
+2) Hotplug notification will be same for any usb (not GSM alone) ?Currently both the messages are the same
+3) What should be done with error code acknowledgement from application ?
+4) Backup trigger from monit to application based on what ? and why ?
+5) Synchronization issues with bidirectional communication of triggers and acknowledgements .

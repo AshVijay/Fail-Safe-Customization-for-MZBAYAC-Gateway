@@ -1,0 +1,356 @@
+import socket
+import subprocess
+import os
+import fcntl
+import pprint
+import time
+
+fil1 = open("/home/avench/Downloads/example_script/custom_monitor/pidfile",'w');
+b=os.getpid();
+fil1.write(str(b)) ;
+fil1.close();
+#	create a socket object
+s= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
+#	get local machine name
+host = socket.gethostname()
+port = 9999
+#connection to hostname on the port
+s.connect((host,port))
+s.settimeout(15);
+
+
+#Receive no more than 1kB
+while 1:
+     flag = 0 ;
+     mes1 = 0 ;
+     s1=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+     s1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
+     host = socket.gethostname()
+     port = 8080
+
+     print 'waiting for a connection_input'
+     time.sleep(1);
+     try :
+        s1.bind((host, port))
+        s1.listen(5)
+        s1.settimeout(2)
+        print 'waiting for a connection_input'
+        CLIENTSOCKET, addr = s1.accept() ;
+        mes1 = CLIENTSOCKET.recv(2);
+        flag = 1 ;  # if connected
+     except socket.timeout :
+        print(" ") ; # Do nothing 
+             
+     s1.close() ;
+
+
+      
+      
+     try:      
+         if mes1 == '45' :
+            s.send("10") ;
+            time.sleep(1) ;  
+            s2= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s2.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
+            host1 = socket.gethostname()
+            port1 = 8000
+            s2.connect((host1,port1))
+            s2.send("89");
+            s2.close();
+     
+         
+         tm = s.recv(2)
+         if tm == '0' :
+            subprocess.call(["sh","/home/avench/Downloads/example_script/custom_monitor/Internet_Script"]);
+            f1= open("/home/avench/Downloads/example_script/custom_monitor/Internet_Code");
+            internet_code=f1.read(1);
+            s.send(internet_code);
+         elif tm == '1':
+           subprocess.call(["sh","/home/avench/Downloads/example_script/custom_monitor/USB_Script"]);
+         elif tm == '2':
+           s.close(); 
+           subprocess.call(["sh","/home/avench/Downloads/example_script/custom_monitor/Application_Script"]);
+           s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+           s.connect((host,port));
+         elif tm == '3': 
+           subprocess.call(["sh","/home/avench/Downloads/example_script/custom_monitor/Restart_Script"]);
+         elif tm == '4' :
+           subprocess.call(["sh","/home/avench/Downloads/example_script/custom_monitor/Wifi_Script"]);
+         elif tm == '5':
+           subprocess.call(["sh","/home/avench/Downloads/example_script/custom_monitor/Socket_Script"]);
+      
+         elif tm == '6': 
+           subprocess.call(["sh","/home/avench/Downloads/example_script/custom_monitor/Backup_Script"]);
+         elif tm == '7' :
+           subprocess.call(["sh","/home/avench/Downloads/example_script/custom_monitor/DiskUsage_Script"])
+           f2= open ("/home/avench/Downloads/example_script/custom_monitor/DiskUsage_Code");
+           diskusage_code = f2.read(1);
+           s.send(diskusage_code); 
+         else :
+           s.close();
+           subprocess.call(["sh","/home/avench/Downloads/example_script/custom_monitor/Application_Script"]);
+           s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+           s.connect((host,port));
+     except socket.timeout:
+         print("Request Timed Out - No response from server")
+         s.close();
+         subprocess.call(["sh","/home/avench/Downloads/example_script/custom_monitor/Application_Script"]);
+         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+         s.connect((host,port));
+        
+         
+
+#       if tm2 == '1' :              # To check if OTA was successful 
+#           succ = 1 ;
+#        else :
+#           succ = 0 ;
+#           s.send(succ) 
+ 
+----------------------------------------------------------------------------------------------------------------------------------------
+#!/usr/bin/env python
+import time
+import thread
+import socket
+import sys,os
+import json,ast
+import pprint
+import urllib2
+import subprocess
+import serial, datetime 
+import scipy
+import numpy
+import math
+import pywt
+import pandas
+import sklearn
+import pickle
+import urllib2,base64,requests
+import netifaces
+import re
+import threading
+import socket
+import struct
+import csv
+import sqlite3
+import time
+
+from svm import *
+from svmutil import *
+
+
+ERROR_CODE = 0x0000
+CLIENTSOCKET = None
+
+sqlite_file = '/home/avench/Downloads/example_script/db.sqlite'    # name of the sqlite database file
+table_name = 'my_table'   # name of the table to be created
+id_field = 'id' # name of the ID column
+date_time_col = 'date_time' # name of the date & time column
+field_type = 'TEXT'  # column data type
+
+# Connecting to the database file
+conn = sqlite3.connect(sqlite_file)
+c = conn.cursor()
+
+# Creating a new SQLite table with 1 column
+c.execute('CREATE TABLE IF NOT EXISTS {tn} ({fn} {ft} PRIMARY KEY AUTOINCREMENT)'\
+        .format(tn=table_name, fn=id_field, ft="INTEGER"))
+
+# adding a new column to save date and time and update with current date-time
+# in the following format: YYYY-MM-DD HH:MM:SS
+# e.g., 2014-03-06 16:26:37
+try:
+	c.execute("ALTER TABLE {tn} ADD COLUMN '{cn}'"\
+	         .format(tn=table_name, cn=date_time_col))
+except: 
+	pass
+conn.commit()
+conn.close()
+
+def fn_update_current_time():
+	global sqlite_file, table_name, id_field, date_time_col
+	conn = sqlite3.connect(sqlite_file)
+	c = conn.cursor()
+	# update row for the new current date and time column, e.g., 2014-03-06 16:26:37
+	c.execute("INSERT INTO {tn} ({cn}) VALUES(CURRENT_TIMESTAMP)"\
+	         .format(tn=table_name, idf=id_field, cn=date_time_col))
+
+	# The database should now look like this:
+	# id         date           time        date_time
+	# "some_id1" "2014-03-06"   "16:42:30"  "2014-03-06 16:42:30"
+
+	conn.commit()
+	conn.close()
+
+def fn_check_internet():
+	global ERROR_CODE
+	#try:
+        #		response = urllib2.urlopen("http://ec2-52-77-255-95.ap-southeast-1.compute.amazonaws.com:8080", timeout=1)
+	#	ERROR_CODE = ERROR_CODE & 0xFFFE
+	#	print 'gsm_connected'
+	#except :
+	#	ERROR_CODE = ERROR_CODE |0x0001
+	#	print 'gsm_disconnected'
+
+def thread_heartbeat(addr):
+	global ERROR_CODE,CLIENTSOCKET
+	while 1:
+		try:
+			if CLIENTSOCKET is not None:
+				CLIENTSOCKET.send(str(ERROR_CODE).encode())
+				time.sleep(5)
+	
+		except (KeyboardInterrupt) as e:
+			print e
+			CLIENTSOCKET.close()
+			print "Client Socket ", addr, " Closed"
+			CLIENTSOCKET = None
+			break
+				
+		except: 
+			CLIENTSOCKET.close()
+			print "Client Socket ", addr, " Closed"
+			CLIENTSOCKET = None
+			break
+
+
+def main_thread():
+	global ERROR_CODE,CLIENTSOCKET
+	serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
+       
+	#get local machine name
+	host = socket.gethostname()
+
+	port = 9999
+
+	#bind the port
+	serversocket.bind((host, port))
+
+	#queue up to 5 requests
+	serversocket.listen(5)
+        
+
+	while True:
+                
+	        #time.sleep(20);		
+		#establish a connection
+		print 'waiting for a connection_input'
+		CLIENTSOCKET, addr = serversocket.accept()
+		CLIENTSOCKET.settimeout(30)
+		print("Got a connection from %s" % str(addr))
+		thread.start_new_thread(thread_heartbeat,(addr,))
+		while True:
+			try:
+				print  CLIENTSOCKET.recv(1024) ;
+			
+			
+                                if CLIENTSOCKET is not None :
+					fn_check_internet()
+					fn_update_current_time()
+				else:
+					CLIENTSOCKET = None
+					break
+			except (KeyboardInterrupt) as e:
+				print e
+				CLIENTSOCKET.close()
+				print "Client Socket ", addr, " Closed"
+				CLIENTSOCKET = None
+				break
+              
+if __name__=="__main__":
+	main_thread()
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+ #!/bin/bash
+while [ 1 ] ; do 
+exec 3<>/dev/tcp/127.0.1.1/8080
+
+if [ $? -eq 0 ]; then
+echo "Success"
+else
+echo "Failed"
+exit 0
+fi
+
+echo -e "45" >&3
+
+nc -l 8000 > /home/avench/new.dat
+echo "Wait"
+CMD=$(cat /home/avench/new.dat)
+echo "CMD: $CMD"
+if [ "$CMD" -eq "89" ]; then
+	echo "$CMD Success"
+else
+	echo "$CMD Fail"
+fi
+
+#while true
+#do
+#echo "LoopST"
+#read -r -u 3 -n 3  $MSG_IN <&3
+#cat <&3
+#echo "1"
+#echo "$MSG_IN" > /home/avench/message
+#if [ "$MSG_IN" -eq "AB" ]; then
+#	touch /home/avench/success
+#else
+#	echo "NE"
+#fi
+#done
+done ;
+exit 0
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+#!/usr/bin/env python
+import time
+import thread
+import socket
+import sys,os
+import json,ast
+import pprint
+import urllib2
+import subprocess
+import serial, datetime 
+import scipy
+import numpy
+import math
+import pywt
+import pandas
+import sklearn
+import pickle
+import urllib2,base64,requests
+import netifaces
+import re
+import threading
+import socket
+import struct
+import csv
+import sqlite3
+import time
+
+s1=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
+host = socket.gethostname()
+port = 8080
+s1.bind((host, port))
+s1.listen(5)
+        
+while(1):
+    print 'waiting for a connection_input'
+    CLIENTSOCKET, addr = s1.accept()
+    mes1 = CLIENTSOCKET.recv(2);
+    print(mes1) ;
+    if ( mes1 == '45' ) :
+       time.sleep(1) ;  
+       s2= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+       s2.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
+       host = socket.gethostname()
+       port = 8000
+       s2.connect((host,port))
+       s2.send("89");
+       s2.close();
+     
+
+          
+      
+

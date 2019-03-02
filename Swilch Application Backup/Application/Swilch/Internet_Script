@@ -1,0 +1,19 @@
+#!/bin/sh
+echo 0x81 > /home/appusr_swilch/swilch/swilch_application_000.000.003/Internet_Code  #'81' for no GSM device connected 
+for a in /sys/bus/usb/devices/* ; do
+       if [  `ls $a | grep "idProduct"` ] &&  [  `ls $a | grep "idVendor"` ]   ; then  #To check if any USB devices are connected
+          
+            if [ `cat $a/bDeviceClass`  =  00 ]; then  # To check if device class is GSM (Change the device class as per Bosch's specification)
+
+                 echo 0 > $a/authorized ;
+                 echo 1 > $a/authorized ;
+                 if ping -q -c 1 -W 1 8.8.8.8 > /dev/null ; then echo 0x83 > Internet_Code ; else  echo 0x82 > Internet_Code ; fi ; # '83' for usb reset and internet available 
+                                                                                                                                    # '82' for usb reset and internet still unavailable
+          
+           fi
+        fi 
+     done ;
+
+exit 0 ;
+  
+

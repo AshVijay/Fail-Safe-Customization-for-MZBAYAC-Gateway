@@ -1,0 +1,6 @@
+#!/bin/sh
+echo 0 > /home/appusr_swilch/swilch/swilch_application_000.000.003/BackupDone_Code
+rsync -a --delete /home/appusr_swilch/swilch/ /backup/recusr_swilch/swilch 2>&1
+if  [ $? = 0 ] ; then 
+   echo 1 > /home/appusr_swilch/swilch/swilch_application_000.000.003/BackupDone_Code  # Echo 1 if the backup was successful , else 0
+fi

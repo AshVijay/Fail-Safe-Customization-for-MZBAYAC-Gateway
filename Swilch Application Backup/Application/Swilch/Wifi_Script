@@ -1,0 +1,5 @@
+#!/bin/sh
+#fuser -k -n tcp 9999
+#service network-manager restart
+systemctl restart hostapd.service
+

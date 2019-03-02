@@ -1,0 +1,16 @@
+#!/bin/sh
+
+PIDFILE=/home/appusr_swilch/swilch/swilch_application_000.000.003/pidfile
+
+case $1 in
+   start)
+
+      exec python /home/appusr_swilch/swilch/swilch_application_000.000.003/Custom_Monitor.py &
+     
+   ;;
+   stop)
+      kill `cat ${PIDFILE}` ;;
+   *)
+      echo "usage: scraper {start|stop}" ;;
+esac
+exit 0

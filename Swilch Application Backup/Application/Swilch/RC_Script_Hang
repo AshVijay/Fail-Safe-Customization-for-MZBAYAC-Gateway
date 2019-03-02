@@ -1,0 +1,15 @@
+#!/bin/sh
+kill $(ps -d | grep "python" | awk '{print $1}')   > /dev/null 2>&1                 #To kill example_script and Custom_Monitor
+kill $(lsof -i | grep "8000" | awk '{print $2}')   > /dev/null 2>&1                 #To kill all processes using port 8000
+kill $(lsof -i | grep "8080" | awk '{print $2}')   > /dev/null 2>&1                 #To kill all processes using port 8080
+/etc/init.d/networking restart
+python "/home/appusr_swilch/swilch/swilch_application_000.000.003/example_script.py"
+sleep 10
+
+
+
+
+
+
+
+

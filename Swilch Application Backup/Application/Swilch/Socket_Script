@@ -1,0 +1,7 @@
+#!/bin/sh
+
+#------------Application always releases the port when closed . Under what circumstance would we have to reset the bindings when application is running ?-------------------
+kill $(lsof -i | grep $1 | grep "LISTEN" | awk '{ print $2}') > /dev/null 2>&1       #To kill the processes using the port number passed as argument
+#kill $(lsof -i | grep "9999" | awk '{print $2}')   > /dev/null 2>&1                 #To kill example_script and Custom_Monitor
+#kill $(lsof -i | grep "8080" | awk '{print $2}')   > /dev/null 2>&1                 #To kill Custom_Monitor
+/etc/init.d/networking restart

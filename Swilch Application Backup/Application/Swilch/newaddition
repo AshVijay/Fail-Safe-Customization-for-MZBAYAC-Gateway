@@ -1,0 +1,24 @@
+
+replace =0
+loop = 1
+while(loop < 4):
+  try :
+        time.sleep(0.5)
+        loop = loop + 1
+        if (replace == 0 ):
+            s.connect((host,port))
+        replace = 1
+  except :
+        replace = 0
+
+def ThreadedCall (command , path) :
+         subprocess.call([command , path])
+
+if(replace == 0) :
+     subprocess.call(["rm","-r","/home/appusr_swilch/swilch/swilch_application_000.000.003"])
+     subprocess.call(["cp","-r","/backup/recusr_swilch/swilch_application_000.000.003","/home/appusr_swilch/swilch/"])
+     print("Replacing the corrupted Application with the last stable version")
+     thread.start_new_thread(ThreadedCall , ("python","/home/appusr_swilch/swilch/swilch_application_000.000.003/example_script.py"))
+     s= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
+

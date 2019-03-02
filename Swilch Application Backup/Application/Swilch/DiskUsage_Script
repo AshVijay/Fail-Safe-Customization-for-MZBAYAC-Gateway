@@ -1,0 +1,9 @@
+#!/bin/sh
+#if [ $(df -h | grep "/dev/mmcblk0p2" |  awk '{ print $5 }' | sed s/\%/\/) -ge '80' ] ; then  echo '0x8e' > DiskUsage_Code ; else  echo '0x8f' > DiskUsage_Code ; fi; #0x8e for disk full and 0x8f for disk free
+a=$(df -h | grep "/dev/mmcblk0p2" |  awk '{ print $5 }' | sed s/\%/\/)  #To extract percentage usage of /dev/mmcblk0p2
+if [ $a -ge 10 ] ; then
+echo "0x8e,0x"$a > DiskUsage_Code ;                                     #If the percentage usage is greater than or equal to 10
+else 
+echo "0x8e,0x0"$a > DiskUsage_Code ;                                    #If the percentage usage is lesser than 10
+fi;
+
